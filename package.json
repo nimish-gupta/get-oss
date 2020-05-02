@@ -1,0 +1,13 @@
+{
+  "name": "get-oss",
+  "version": "1.0.0",
+  "description": "This will help in getting the email of top contributors from the repo.",
+  "main": "index.js",
+  "repository": "https://github.com/nimish-gupta/get-oss",
+  "author": "Nimish Gupta",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "@octokit/rest": "^17.6.0"
+  }
+}

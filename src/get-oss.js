@@ -1,4 +1,6 @@
 const { Octokit } = require("@octokit/rest");
+const inquirer = require("inquirer");
+const searchPrompt = require("./questions").getSearchPrompt;
 
 const octokit = new Octokit({
     userAgent: 'get-oss v1.2.3'
@@ -15,8 +17,9 @@ const search = async ({ query: q, page = 1 }) => {
     console.log(repos);
 };
 
-const main = (argv) => {
-    console.log(argv);
+const main = async (argv) => {
+    const answer = await searchPrompt();
+    console.log(answer);
 };
 
 main(process.argv);

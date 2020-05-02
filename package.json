@@ -7,7 +7,11 @@
   "author": "Nimish Gupta",
   "license": "MIT",
   "private": false,
+  "scripts": {
+    "start:dev": "node src/get-oss.js"
+  },
   "dependencies": {
-    "@octokit/rest": "^17.6.0"
+    "@octokit/rest": "^17.6.0",
+    "inquirer": "^7.1.0"
   }
 }

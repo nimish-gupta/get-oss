@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^17.6.0",
-    "inquirer": "^7.1.0"
+    "inquirer": "^7.1.0",
+    "validator": "^13.0.0"
   }
 }

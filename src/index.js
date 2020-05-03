@@ -20,4 +20,4 @@ const main = async (args) => {
 	return process.exit(0);
 };
 
-main(process.argv);
+module.exports = { main };

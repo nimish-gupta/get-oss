@@ -2,6 +2,39 @@ const ora = require('ora');
 
 const Questions = require('./questions');
 const Github = require('./github');
+const Log = require('./log');
+
+const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
+	let count = 0,
+		emailsWithUser = [];
+	const userSpinner = ora();
+
+	for (let user of usernames) {
+		if (count > 10) {
+			break;
+		}
+
+		userSpinner.start(`Getting email for user ${user}... `);
+		try {
+			const info = await Github.getUserInfo(user);
+
+			if (info !== null && info.email !== null) {
+				emailsWithUser.push({ name: info.name, email: info.email });
+				userSpinner.succeed(
+					Log.success(`${user}'s email exist in github as ${info.email}`)
+				);
+				count++;
+			} else {
+				userSpinner.fail(Log.error(`${user}'s email doesn't exist in github`));
+			}
+		} catch (error) {
+			userSpinner.fail(
+				Log.error(`Could not fetch email for ${user} due to ${error.message}`)
+			);
+		}
+	}
+	return emailsWithUser;
+};
 
 const main = async (args) => {
 	const { repoQuery: query } = await Questions.getSearchPrompt();
@@ -26,12 +59,10 @@ const main = async (args) => {
 	spinner.succeed();
 	spinner.start('Getting the list of users email addresses...');
 
-	await Github.getUserInfo(usernames[0]);
+	const emailsWithUser = await getEmailOfFirstTenCollaborators({ usernames });
+
 	spinner.succeed();
-	console.table([
-		{ a: 1, b: 'Y' },
-		{ a: 'Z', b: 2 },
-	]);
+	console.table(emailsWithUser);
 	return process.exit(0);
 };
 

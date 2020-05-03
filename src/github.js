@@ -30,11 +30,11 @@ const getContributorUserNames = async ({ owner, repo }) => {
 	return items.map((item) => item.login);
 };
 
-const getEmail = async (username) => {
+const getUserInfo = async (username) => {
 	const { data: user } = await octokit.users.getByUsername({ username });
 
 	if (user.email !== null) {
-		return user.email;
+		return user;
 	}
 
 	const {
@@ -55,7 +55,7 @@ const getEmail = async (username) => {
 		);
 
 	if (author !== undefined) {
-		return author.email;
+		return { ...user, email: author.email };
 	}
 
 	const {
@@ -85,11 +85,16 @@ const getEmail = async (username) => {
 				validator.isEmail(commit.author.email)
 		);
 
-	return commitAuthor === undefined ? null : commitAuthor.author.email;
+	return commitAuthor === undefined
+		? null
+		: {
+				...user,
+				email: commitAuthor.author.email,
+		  };
 };
 
 module.exports = {
 	search,
 	getContributorUserNames,
-	getEmail,
+	getUserInfo,
 };

@@ -1,25 +1,23 @@
-const { Octokit } = require("@octokit/rest");
-const inquirer = require("inquirer");
-const searchPrompt = require("./questions").getSearchPrompt;
+const Questions = require('./questions');
+const Github = require('./github');
 
-const octokit = new Octokit({
-    userAgent: 'get-oss v1.2.3'
-});
+const main = async (args) => {
+	const { repoQuery: query } = await Questions.getSearchPrompt();
+	const repos = await Github.search({ query });
 
-const search = async ({ query: q, page = 1 }) => {
-    const repos = await octokit.search.repos({
-        q,
-        sort: "stars",
-        order: "desc",
-        per_page: 10,
-        page,
-    });
-    console.log(repos);
-};
+	if (repos.length === 0) {
+		const { searchAgain } = await Questions.repoDoesNotExistPrompt();
 
-const main = async (argv) => {
-    const answer = await searchPrompt();
-    console.log(answer);
+		if (searchAgain === true) {
+			await main(args);
+		}
+		return process.exit(0);
+	}
+
+	const { repo } = await Questions.getSelectRepoPrompt(repos);
+	const usernames = await Github.getContributorUserNames(repo);
+	await Github.getEmail(usernames[0]);
+	return process.exit(0);
 };
 
 main(process.argv);

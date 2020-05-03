@@ -42,14 +42,16 @@ const getEmail = async (username) => {
 	} = await octokit.activity.listEventsForAuthenticatedUser({
 		username,
 	});
-	console.log(user.name);
 
 	const author = events
 		.filter((event) => event.payload && event.payload.commits)
 		.map((event) => event.payload.commits)
 		.find(
 			(commit) =>
-				commit.author && commit.author.name && commit.author.name === user.name
+				commit.author &&
+				commit.author.name &&
+				commit.author.name === user.name &&
+				validator.isEmail(commit.author.email)
 		);
 
 	if (author !== undefined) {

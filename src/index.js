@@ -21,7 +21,7 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 			const info = await Github.getUserInfo(user);
 
 			if (info !== null && info.email !== null) {
-				emailsWithUser.push({ user: info });
+				emailsWithUser.push(user);
 				userSpinner.succeed(
 					Log.success(`${user}'s email exist in github as ${info.email}`)
 				);

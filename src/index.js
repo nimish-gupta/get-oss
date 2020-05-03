@@ -4,6 +4,7 @@ const Table = require('cli-table');
 const Questions = require('./questions');
 const Github = require('./github');
 const Log = require('./log');
+const Util = require('./utils');
 
 const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 	let count = 0,
@@ -53,7 +54,10 @@ const main = async (args) => {
 	const { repoQuery: query } = await Questions.getSearchPrompt();
 
 	const spinner = ora('Searching the repos...').start();
-	const repos = await Github.search({ query });
+	const repos = await Util.exitPromise(
+		Github.search({ query }),
+		'repositories'
+	);
 	spinner.stop();
 
 	if (repos.length === 0) {
@@ -62,18 +66,20 @@ const main = async (args) => {
 		if (searchAgain === true) {
 			await main(args);
 		}
-		return process.exit(0);
+		process.exit(0);
 	}
 
 	const { repo } = await Questions.getSelectRepoPrompt(repos);
+
 	spinner.start('Getting the list of contributors...');
-
-	const usernames = await Github.getContributorUserNames(repo);
+	const usernames = await Util.exitPromise(
+		Github.getContributorUserNames(repo),
+		'contributors'
+	);
 	spinner.succeed();
+
 	spinner.start('Getting the list of users email addresses...');
-
 	const emailsWithUser = await getEmailOfFirstTenCollaborators({ usernames });
-
 	spinner.succeed();
 
 	printInfo({ emailsWithUser });

@@ -1,4 +1,5 @@
 const ora = require('ora');
+const Table = require('cli-table');
 
 const Questions = require('./questions');
 const Github = require('./github');
@@ -19,7 +20,7 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 			const info = await Github.getUserInfo(user);
 
 			if (info !== null && info.email !== null) {
-				emailsWithUser.push({ name: info.name, email: info.email });
+				emailsWithUser.push({ user: info });
 				userSpinner.succeed(
 					Log.success(`${user}'s email exist in github as ${info.email}`)
 				);
@@ -34,6 +35,18 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 		}
 	}
 	return emailsWithUser;
+};
+
+const printInfo = ({ emailsWithUser }) => {
+	const table = new Table({
+		head: ['User Name', 'Full Name', 'Github Link', 'Email'],
+	});
+
+	table.push(
+		emailsWithUser.map((user) => [user.login, user.name, user.url, user.email])
+	);
+
+	console.log(table.toString());
 };
 
 const main = async (args) => {
@@ -62,7 +75,8 @@ const main = async (args) => {
 	const emailsWithUser = await getEmailOfFirstTenCollaborators({ usernames });
 
 	spinner.succeed();
-	console.table(emailsWithUser);
+
+	printInfo({ emailsWithUser });
 	return process.exit(0);
 };
 

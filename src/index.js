@@ -5,6 +5,7 @@ const Github = require('./github');
 const Log = require('./log');
 const Util = require('./utils');
 const Args = require('./args');
+const Table = require('./table');
 
 const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 	let count = 0,
@@ -21,7 +22,7 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 			const info = await Github.getUserInfo(user);
 
 			if (info !== null && info.email !== null) {
-				emailsWithUser.push(user);
+				emailsWithUser.push(info);
 				userSpinner.succeed(
 					Log.success(`${user}'s email exist in github as ${info.email}`)
 				);
@@ -77,7 +78,7 @@ const main = async (args) => {
 		'Getting the list of users email addresses...'
 	);
 
-	Util.formatter({ emailsWithUser });
+	Table.formatter({ emailsWithUser });
 	return process.exit(0);
 };
 

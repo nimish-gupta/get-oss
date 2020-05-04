@@ -1,4 +1,6 @@
 const Table = require('cli-table');
+const ora = require('ora');
+
 const Log = require('./log');
 
 const promisify = async (promise) => {
@@ -24,23 +26,6 @@ const exitPromise = async (promise, msg) => {
 	return result;
 };
 
-const formatter = ({ emailsWithUser }) => {
-	const table = new Table({
-		head: ['User Name', 'Full Name', 'Github Link', 'Email'],
-	});
-	const data = emailsWithUser.map((user) => [
-		user.login,
-		user.name,
-		user.url,
-		user.email,
-	]);
-	console.log({ data });
-
-	table.push(data);
-
-	console.log(table.toString());
-};
-
 const spinnerPromise = async (promise, msg) => {
 	const spinner = ora(msg).start();
 	const result = await promise;
@@ -48,4 +33,4 @@ const spinnerPromise = async (promise, msg) => {
 	return result;
 };
 
-module.exports = { promisify, exitPromise, formatter, spinnerPromise };
+module.exports = { promisify, exitPromise, spinnerPromise };

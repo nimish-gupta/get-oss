@@ -2,6 +2,8 @@
 
 This will help in getting the email of top contributors from the repo.
 
+[![npm version](https://badge.fury.io/js/get-oss.svg)](https://badge.fury.io/js/get-oss)
+
 ## Install
 
 - yarn - `yarn global add get-oss`

@@ -1,10 +1,10 @@
 const ora = require('ora');
-const Table = require('cli-table');
 
 const Questions = require('./questions');
 const Github = require('./github');
 const Log = require('./log');
 const Util = require('./utils');
+const Args = require('./args');
 
 const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 	let count = 0,
@@ -35,30 +35,24 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 			);
 		}
 	}
+	console.log({ emailsWithUser });
 	return emailsWithUser;
 };
 
-const printInfo = ({ emailsWithUser }) => {
-	const table = new Table({
-		head: ['User Name', 'Full Name', 'Github Link', 'Email'],
-	});
-
-	table.push(
-		emailsWithUser.map((user) => [user.login, user.name, user.url, user.email])
-	);
-
-	console.log(table.toString());
-};
-
 const main = async (args) => {
+	const parsedArgs = Args.parseArgs(args);
+
+	if (parsedArgs.help) {
+		Args.help();
+		process.exit(0);
+	}
+
 	const { repoQuery: query } = await Questions.getSearchPrompt();
 
-	const spinner = ora('Searching the repos...').start();
-	const repos = await Util.exitPromise(
-		Github.search({ query }),
-		'repositories'
+	const repos = await Util.spinnerPromise(
+		Util.exitPromise(Github.search({ query }), 'repositories'),
+		'Searching the repos...'
 	);
-	spinner.stop();
 
 	if (repos.length === 0) {
 		const { searchAgain } = await Questions.repoDoesNotExistPrompt();
@@ -71,18 +65,17 @@ const main = async (args) => {
 
 	const { repo } = await Questions.getSelectRepoPrompt(repos);
 
-	spinner.start('Getting the list of contributors...');
-	const usernames = await Util.exitPromise(
-		Github.getContributorUserNames(repo),
-		'contributors'
+	const usernames = await Util.spinnerPromise(
+		Util.exitPromise(Github.getContributorUserNames(repo), 'contributors'),
+		'Getting the list of contributors...'
 	);
-	spinner.succeed();
 
-	spinner.start('Getting the list of users email addresses...');
-	const emailsWithUser = await getEmailOfFirstTenCollaborators({ usernames });
-	spinner.succeed();
+	const emailsWithUser = await Util.spinnerPromise(
+		getEmailOfFirstTenCollaborators({ usernames }),
+		'Getting the list of users email addresses...'
+	);
 
-	printInfo({ emailsWithUser });
+	Util.formatter({ emailsWithUser });
 	return process.exit(0);
 };
 

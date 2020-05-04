@@ -4,4 +4,8 @@ WORKDIR /app
 
 COPY . .
 
+RUN yarn install
+
+ENTRYPOINT [ "node", "." ]
+
 

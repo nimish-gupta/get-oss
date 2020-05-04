@@ -41,11 +41,11 @@ const formatter = ({ emailsWithUser }) => {
 	console.log(table.toString());
 };
 
-const spinnerPromise = (promise, msg) => {
-  const spinner = ora(msg).start();
-  const result = await promise;
-  spinner.stop();
-  return result;
-}
+const spinnerPromise = async (promise, msg) => {
+	const spinner = ora(msg).start();
+	const result = await promise;
+	spinner.stop();
+	return result;
+};
 
 module.exports = { promisify, exitPromise, formatter, spinnerPromise };

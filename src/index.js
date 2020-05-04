@@ -47,6 +47,8 @@ const main = async (args) => {
 		process.exit(0);
 	}
 
+	Github.setAuth(parsedArgs.token);
+
 	const { repoQuery: query } = await Questions.getSearchPrompt();
 
 	const repos = await Util.spinnerPromise(

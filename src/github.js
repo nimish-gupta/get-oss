@@ -1,9 +1,14 @@
 const { Octokit } = require('@octokit/rest');
 const validator = require('validator');
 
-const octokit = new Octokit({
-	userAgent: 'get-oss v1.2.3',
-});
+let octokit = null;
+
+const setAuth = (token) => {
+	octokit = new Octokit({
+		userAgent: 'get-oss v1.2.3',
+		...(token ? { auth: token } : {}),
+	});
+};
 
 const search = async ({ query: q, page = 1 }) => {
 	const {
@@ -97,4 +102,5 @@ module.exports = {
 	search,
 	getContributorUserNames,
 	getUserInfo,
+	setAuth,
 };

@@ -11,15 +11,14 @@ const setAuth = (token) => {
 	return octokit;
 };
 
-const search = async ({ query: q, page = 1 }) => {
+const search = async (query) => {
 	const {
 		data: { items },
 	} = await octokit.search.repos({
-		q,
+		q: query,
 		sort: 'stars',
 		order: 'desc',
 		per_page: 10,
-		page,
 	});
 	return items.map(({ full_name, name: repo, owner: { login: owner } }) => ({
 		full_name,
@@ -36,9 +35,9 @@ const getContributorUserNames = async ({ owner, repo }) => {
 	return items.map((item) => item.login);
 };
 
-const checkValidEmailFromCommit = (name) => (commit) =>
+const checkValidEmailFromCommit = (username) => (commit) =>
 	commit.author &&
-	commit.author.name === name &&
+	commit.author.name === username &&
 	validator.isEmail(commit.author.email);
 
 const getUserInfo = async (username) => {

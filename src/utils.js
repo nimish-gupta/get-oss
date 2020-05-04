@@ -11,7 +11,7 @@ const promisify = async (promise) => {
 	}
 };
 
-const exitPromise = async (promise, msg, onError = () => process.exit(1)) => {
+const exitPromise = (msg) => async (promise) => {
 	const [result, error] = await promisify(promise);
 
 	if (error !== null) {
@@ -24,11 +24,20 @@ const exitPromise = async (promise, msg, onError = () => process.exit(1)) => {
 	return result;
 };
 
-const spinnerPromise = async (promise, text, spinnerOptions = {}) => {
+const spinnerPromise = (msg, spinnerOptions = {}) => async (promise) => {
 	const spinner = ora({ text, ...spinnerOptions }).start();
 	const result = await promise;
 	spinner.stop();
 	return result;
 };
 
-module.exports = { promisify, exitPromise, spinnerPromise };
+const compose = (...functions) => (input) =>
+	functions.reduceRight(
+		(chain, func) => chain.then(func),
+		Promise.resolve(input)
+	);
+
+const pipe = (...functions) => (input) =>
+	functions.reduce((chain, func) => chain.then(func), Promise.resolve(input));
+
+module.exports = { promisify, exitPromise, spinnerPromise, compose, pipe };

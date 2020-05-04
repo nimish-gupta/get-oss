@@ -35,7 +35,10 @@ const repoDoesNotExistPrompt = async () =>
 		message: `Repo doesn't exist. Do you want to search again?`,
 	});
 
+const getAnswer = (key) => (answer) => answer[key];
+
 module.exports = {
+	getAnswer,
 	getSearchPrompt,
 	getSelectRepoPrompt,
 	repoDoesNotExistPrompt,

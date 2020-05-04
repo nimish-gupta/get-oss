@@ -7,7 +7,7 @@ const Util = require('./utils');
 const Args = require('./args');
 const Table = require('./table');
 
-const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
+const getEmailOfFirstTenCollaborators = async (usernames) => {
 	let count = 0,
 		emailsWithUser = [];
 	const userSpinner = ora();
@@ -31,6 +31,7 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 				userSpinner.fail(Log.error(`${user}'s email doesn't exist in github`));
 			}
 		} catch (error) {
+			console.log(error);
 			userSpinner.fail(
 				Log.error(`Could not fetch email for ${user} due to ${error.message}`)
 			);
@@ -39,7 +40,7 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 	return emailsWithUser;
 };
 
-const main = async (args, onExit = () => process.exit(0)) => {
+const parseArgs = (args) => {
 	const parsedArgs = Args.parseArgs(args);
 
 	if (parsedArgs.help) {
@@ -48,37 +49,43 @@ const main = async (args, onExit = () => process.exit(0)) => {
 	}
 
 	Github.setAuth(parsedArgs.secret);
+};
 
-	const { repoQuery: query } = await Questions.getSearchPrompt();
-
-	const repos = await Util.spinnerPromise(
-		Util.exitPromise(Github.search({ query }), 'repositories'),
-		'Searching the repos...'
-	);
+const getRepoName = async () => {
+	const repos = await Util.pipe(
+		Questions.getSearchPrompt,
+		Questions.getAnswer('repoQuery'),
+		Github.search,
+		Util.exitPromise('repositories'),
+		Util.spinnerPromise('Searching the repos...')
+	)();
 
 	if (repos.length === 0) {
 		const { searchAgain } = await Questions.repoDoesNotExistPrompt();
 
 		if (searchAgain === true) {
-			await main(args);
+			await getRepoName();
 		}
 		return onExit(searchAgain);
 	}
 
 	const { repo } = await Questions.getSelectRepoPrompt(repos);
-
-	const usernames = await Util.spinnerPromise(
-		Util.exitPromise(Github.getContributorUserNames(repo), 'contributors'),
-		'Getting the list of contributors...'
-	);
-
-	const emailsWithUser = await Util.spinnerPromise(
-		getEmailOfFirstTenCollaborators({ usernames }),
-		'Getting the list of users email addresses...'
-	);
-
-	Table.formatter({ emailsWithUser });
-	return onExit(emailsWithUser);
+	return repo;
 };
 
-module.exports = { main, getEmailOfFirstTenCollaborators };
+const getEmailsWithUser = Util.pipe(
+	Github.getContributorUserNames,
+	Util.exitPromise('contributors'),
+	Util.spinnerPromise('Getting the list of contributors...'),
+	getEmailOfFirstTenCollaborators,
+	Util.spinnerPromise('Getting the list of users email addresses...')
+);
+
+const main = Util.pipe(
+	parseArgs,
+	getRepoName,
+	getEmailsWithUser,
+	Table.formatter
+);
+
+module.exports = { main };

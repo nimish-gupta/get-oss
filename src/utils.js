@@ -31,13 +31,16 @@ const spinnerPromise = (msg, spinnerOptions = {}) => async (promise) => {
 	return result;
 };
 
-const compose = (...functions) => (input) =>
-	functions.reduceRight(
-		(chain, func) => chain.then(func),
-		Promise.resolve(input)
-	);
-
-const pipe = (...functions) => (input) =>
+const pipeAsync = (...functions) => (input) =>
 	functions.reduce((chain, func) => chain.then(func), Promise.resolve(input));
 
-module.exports = { promisify, exitPromise, spinnerPromise, compose, pipe };
+const pipe = (...functions) => (input) =>
+	functions.reduce((val, func) => func(val), input);
+
+module.exports = {
+	promisify,
+	exitPromise,
+	spinnerPromise,
+	pipe,
+	pipeAsync,
+};

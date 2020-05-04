@@ -52,12 +52,14 @@ const parseArgs = (args) => {
 };
 
 const getRepoName = async () => {
-	const repos = await Util.pipe(
+	const repos = await Util.pipeAsync(
 		Questions.getSearchPrompt,
 		Questions.getAnswer('repoQuery'),
-		Github.search,
-		Util.exitPromise('repositories'),
-		Util.spinnerPromise('Searching the repos...')
+		Util.pipe(
+			Github.search,
+			Util.exitPromise('repositories'),
+			Util.spinnerPromise('Searching the repos...')
+		)
 	)();
 
 	if (repos.length === 0) {
@@ -73,15 +75,19 @@ const getRepoName = async () => {
 	return repo;
 };
 
-const getEmailsWithUser = Util.pipe(
-	Github.getContributorUserNames,
-	Util.exitPromise('contributors'),
-	Util.spinnerPromise('Getting the list of contributors...'),
-	getEmailOfFirstTenCollaborators,
-	Util.spinnerPromise('Getting the list of users email addresses...')
+const getEmailsWithUser = Util.pipeAsync(
+	Util.pipe(
+		Github.getContributorUserNames,
+		Util.exitPromise('contributors'),
+		Util.spinnerPromise('Getting the list of contributors...')
+	),
+	Util.pipe(
+		getEmailOfFirstTenCollaborators,
+		Util.spinnerPromise('Getting the list of users email addresses...')
+	)
 );
 
-const main = Util.pipe(
+const main = Util.pipeAsync(
 	parseArgs,
 	getRepoName,
 	getEmailsWithUser,

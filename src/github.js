@@ -35,9 +35,13 @@ const getContributorUserNames = async ({ owner, repo }) => {
 	return items.map((item) => item.login);
 };
 
+const checkValidEmailFromCommit = (commit) =>
+	commit.author &&
+	commit.author.name === user.name &&
+	validator.isEmail(commit.author.email);
+
 const getUserInfo = async (username) => {
 	const { data: user } = await octokit.users.getByUsername({ username });
-
 	if (user.email !== null) {
 		return user;
 	}
@@ -48,19 +52,14 @@ const getUserInfo = async (username) => {
 		username,
 	});
 
-	const author = events
+	const eventAuthor = events
 		.filter((event) => event.payload && event.payload.commits)
 		.map((event) => event.payload.commits)
-		.find(
-			(commit) =>
-				commit.author &&
-				commit.author.name &&
-				commit.author.name === user.name &&
-				validator.isEmail(commit.author.email)
-		);
+		.flat()
+		.find(checkValidEmailFromCommit);
 
-	if (author !== undefined) {
-		return { ...user, email: author.email };
+	if (eventAuthor !== undefined) {
+		return { ...user, email: eventAuthor.author.email };
 	}
 
 	const {
@@ -83,12 +82,7 @@ const getUserInfo = async (username) => {
 
 	const commitAuthor = commits
 		.map((commit) => commit.commit)
-		.find(
-			(commit) =>
-				commit.author &&
-				commit.author.name === user.name &&
-				validator.isEmail(commit.author.email)
-		);
+		.find(checkValidEmailFromCommit);
 
 	return commitAuthor === undefined
 		? null

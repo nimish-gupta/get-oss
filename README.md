@@ -2,6 +2,25 @@
 
 This will help in getting the email of top contributors from the repo.
 
+## Install
+
+- yarn - `yarn global add get-oss`
+- npm - `npm install --global get-oss`
+
+## Usage
+
+Go to terminal and enter the following command:
+
+`get-oss`
+
+For getting more limit through github
+
+`get-oss --secret <GITHUB_SECRET_TOKEN>`
+
+For getting help for any command
+
+`get-oss --help`
+
 ## Development
 
 1. Run through terminal enter `yarn start:dev` in the root of the repo

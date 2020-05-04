@@ -36,7 +36,6 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 			);
 		}
 	}
-	console.log({ emailsWithUser });
 	return emailsWithUser;
 };
 

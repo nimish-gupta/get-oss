@@ -17,7 +17,7 @@
 		"get-oss": "./bin/get-oss.js"
 	},
 	"scripts": {
-		"start:dev": "node src/index.js"
+		"start:dev": "node ."
 	},
 	"dependencies": {
 		"@octokit/rest": "^17.6.0",

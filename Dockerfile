@@ -6,6 +6,6 @@ COPY . .
 
 RUN yarn install
 
-ENTRYPOINT [ "node", "." ]
+ENTRYPOINT [ "yarn", "start:dev" ]
 
 

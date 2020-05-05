@@ -2,7 +2,7 @@
 
 This will help in getting the email of top contributors from the repo.
 
-[![npm version](https://badge.fury.io/js/get-oss.svg)](https://badge.fury.io/js/get-oss)
+[![npm version](https://badge.fury.io/js/get-oss.svg)](https://badge.fury.io/js/get-oss) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Install
 

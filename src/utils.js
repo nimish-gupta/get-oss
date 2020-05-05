@@ -1,4 +1,3 @@
-const Table = require('cli-table');
 const ora = require('ora');
 
 const Log = require('./log');
@@ -20,14 +19,17 @@ const exitPromise = async (promise, msg) => {
 		console.log(
 			Log.error(`Could not query repo for ${msg} due to, ${error.message}`)
 		);
-		process.exit(1);
+		if (process.env.NODE_ENV === 'test') {
+			return error;
+		}
+		process.env.process.exit(1);
 	}
 
 	return result;
 };
 
-const spinnerPromise = async (promise, msg) => {
-	const spinner = ora(msg).start();
+const spinnerPromise = async (promise, text, stream = null) => {
+	const spinner = ora({ text, ...(stream === null ? {} : { stream }) }).start();
 	const result = await promise;
 	spinner.stop();
 	return result;

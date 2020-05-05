@@ -17,7 +17,8 @@
 		"get-oss": "./bin/get-oss.js"
 	},
 	"scripts": {
-		"start:dev": "node ."
+		"start:dev": "node .",
+		"test": "nyc ava"
 	},
 	"dependencies": {
 		"@octokit/rest": "^17.6.0",
@@ -27,5 +28,18 @@
 		"minimist": "^1.2.5",
 		"ora": "^4.0.4",
 		"validator": "^13.0.0"
+	},
+	"ava": {
+		"files": [
+			"src/**/*.test.js"
+		],
+		"failFast": true,
+		"verbose": true
+	},
+	"devDependencies": {
+		"ava": "^3.8.1",
+		"get-stream": "^5.1.0",
+		"nyc": "^15.0.1",
+		"strip-ansi": "^6.0.0"
 	}
 }

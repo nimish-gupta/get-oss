@@ -7,29 +7,25 @@ const promisify = async (promise) => {
 		const result = await promise;
 		return [result, null];
 	} catch (error) {
-		return [null, error];
+		return [null, error.message];
 	}
 };
 
-const exitPromise = async (promise, msg) => {
+const exitPromise = async (promise, msg, onError = () => process.exit(1)) => {
 	const [result, error] = await promisify(promise);
 
 	if (error !== null) {
+		const errorMessage = `Could not query repo for ${msg} due to, ${error}`;
 		console.log('\n');
-		console.log(
-			Log.error(`Could not query repo for ${msg} due to, ${error.message}`)
-		);
-		if (process.env.NODE_ENV === 'test') {
-			return error;
-		}
-		process.env.process.exit(1);
+		console.log(Log.error(errorMessage));
+		return onError(errorMessage);
 	}
 
 	return result;
 };
 
-const spinnerPromise = async (promise, text, stream = null) => {
-	const spinner = ora({ text, ...(stream === null ? {} : { stream }) }).start();
+const spinnerPromise = async (promise, text, spinnerOptions = {}) => {
+	const spinner = ora({ text, ...spinnerOptions }).start();
 	const result = await promise;
 	spinner.stop();
 	return result;

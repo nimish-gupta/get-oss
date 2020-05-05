@@ -1,31 +1,33 @@
 const test = require('ava');
 const PassThroughStream = require('stream').PassThrough;
 const getStream = require('get-stream');
-const stripAnsi = require('strip-ansi');
 
 const Util = require('../utils');
 
+const successPromise = () => Promise.resolve('success');
+const errorPromise = () => Promise.reject(new Error('fail'));
+
 test('promisify resolves', async (t) => {
-	const promise = await Util.promisify(Promise.resolve('success'));
+	const promise = await Util.promisify(successPromise());
 	t.deepEqual(promise, ['success', null]);
 });
 
 test('promisify rejects', async (t) => {
-	const promise = await Util.promisify(Promise.reject('fail'));
+	const promise = await Util.promisify(errorPromise());
 	t.deepEqual(promise, [null, 'fail']);
 });
 
 test('exitPromise resolves', async (t) => {
-	const promise = await Util.exitPromise(Promise.resolve('success'));
+	const promise = await Util.exitPromise(successPromise(), '');
 	t.is(promise, 'success');
 });
 
 test('exitPromise rejects', async (t) => {
-	const promise = await Util.exitPromise(Promise.reject('fail'));
-	t.is(promise, 'fail');
+	const promise = await Util.exitPromise(errorPromise(), 'test', (x) => x);
+	t.is(promise, 'Could not query repo for test due to, fail');
 });
 
-test.before((t) => {
+test.beforeEach((t) => {
 	const noop = () => {};
 	const stream = new PassThroughStream();
 	stream.clearLine = noop;
@@ -34,14 +36,21 @@ test.before((t) => {
 	t.context.stream = stream;
 });
 
-test.only('spinnerPromise resolves', async (t) => {
-	const promise = await Util.spinnerPromise(
-		Promise.resolve('success'),
-		'test',
-		t.context.stream
-	);
+test.skip('spinnerPromise resolves', async (t) => {
+	const msg = 'test promise spinner';
+
+	const promise = await Util.spinnerPromise(successPromise(), msg, {
+		stream: t.context.stream,
+	});
 	t.context.stream.end();
 	const output = await getStream(t.context.stream);
-	console.log({ output });
-	t.deepEqual(promise, 'success');
+
+	t.is(output, `- ${msg}\n`);
+	t.is(promise, 'success');
 });
+
+test('spinnerPromise reject', async (t) =>
+	await t.throwsAsync(
+		async () => Util.spinnerPromise(Promise.reject(new Error('fail')), ''),
+		{ instanceOf: Error, message: 'fail' }
+	));

@@ -1,4 +1,5 @@
 const ora = require('ora');
+const R = require('ramda');
 
 const Questions = require('./questions');
 const Github = require('./github');
@@ -51,28 +52,32 @@ const parseArgs = (args) => {
 	Github.setAuth(parsedArgs.secret);
 };
 
-const getRepoName = async () => {
-	const repos = await Util.pipeAsync(
-		Questions.getSearchPrompt,
-		Questions.getAnswer('repoQuery'),
-		Util.pipe(
+const repoQuery = R.pipe(
+	Questions.getSearchPrompt,
+	Util.then(
+		R.pipe(
+			R.prop('repoQuery'),
 			Github.search,
 			Util.exitPromise('repositories'),
 			Util.spinnerPromise('Searching the repos...')
 		)
-	)();
+	)
+);
 
+const getRepoName = async () => {
+	const repos = await repoQuery();
 	if (repos.length === 0) {
 		const { searchAgain } = await Questions.repoDoesNotExistPrompt();
-
 		if (searchAgain === true) {
-			await getRepoName();
+			return getRepoName();
 		}
-		return onExit(searchAgain);
-	}
 
-	const { repo } = await Questions.getSelectRepoPrompt(repos);
-	return repo;
+		process.exit(0);
+	}
+	return R.pipe(
+		getEmailOfFirstTenCollaborators,
+		Util.spinnerPromise('Getting the list of users email addresses...')
+	)();
 };
 
 const getEmailsWithUser = Util.pipeAsync(
@@ -87,11 +92,11 @@ const getEmailsWithUser = Util.pipeAsync(
 	)
 );
 
-const main = Util.pipeAsync(
+const main = R.pipe(
 	parseArgs,
 	getRepoName,
-	getEmailsWithUser,
-	Table.formatter
+	Util.then(getEmailsWithUser),
+	Util.then(Table.formatter)
 );
 
 module.exports = { main };

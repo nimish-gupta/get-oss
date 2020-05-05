@@ -1,3 +1,4 @@
+const R = require('ramda');
 const ora = require('ora');
 
 const Log = require('./log');
@@ -24,7 +25,7 @@ const exitPromise = (msg) => async (promise) => {
 	return result;
 };
 
-const spinnerPromise = (msg, spinnerOptions = {}) => async (promise) => {
+const spinnerPromise = (text, spinnerOptions = {}) => async (promise) => {
 	const spinner = ora({ text, ...spinnerOptions }).start();
 	const result = await promise;
 	spinner.stop();
@@ -37,10 +38,13 @@ const pipeAsync = (...functions) => (input) =>
 const pipe = (...functions) => (input) =>
 	functions.reduce((val, func) => func(val), input);
 
+const then = R.curry((f, p) => p.then(f));
+
 module.exports = {
 	promisify,
 	exitPromise,
 	spinnerPromise,
 	pipe,
 	pipeAsync,
+	then,
 };

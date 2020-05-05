@@ -1,6 +1,6 @@
 {
 	"name": "get-oss",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "This will help in getting the email of top contributors from the repo.",
 	"main": "bin/get-oss.js",
 	"repository": "https://github.com/nimish-gupta/get-oss",

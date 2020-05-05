@@ -35,9 +35,9 @@ const getContributorUserNames = async ({ owner, repo }) => {
 	return items.map((item) => item.login);
 };
 
-const checkValidEmailFromCommit = (commit) =>
+const checkValidEmailFromCommit = (name) => (commit) =>
 	commit.author &&
-	commit.author.name === user.name &&
+	commit.author.name === name &&
 	validator.isEmail(commit.author.email);
 
 const getUserInfo = async (username) => {
@@ -56,7 +56,7 @@ const getUserInfo = async (username) => {
 		.filter((event) => event.payload && event.payload.commits)
 		.map((event) => event.payload.commits)
 		.flat()
-		.find(checkValidEmailFromCommit);
+		.find(checkValidEmailFromCommit(user.name));
 
 	if (eventAuthor !== undefined) {
 		return { ...user, email: eventAuthor.author.email };
@@ -82,7 +82,7 @@ const getUserInfo = async (username) => {
 
 	const commitAuthor = commits
 		.map((commit) => commit.commit)
-		.find(checkValidEmailFromCommit);
+		.find(checkValidEmailFromCommit(user.name));
 
 	return commitAuthor === undefined
 		? null

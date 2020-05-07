@@ -12,7 +12,6 @@ const setAuth = (token) => {
 };
 
 const search = async (query) => {
-	console.log(query);
 	const {
 		data: { items },
 	} = await octokit.search.repos({

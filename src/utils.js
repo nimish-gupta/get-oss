@@ -1,7 +1,11 @@
 const R = require('ramda');
 const ora = require('ora');
+const F = require('ramda-fantasy');
 
 const Log = require('./log');
+
+const futurePromise = (promise) =>
+	F.Future((reject, resolve) => promise.then(resolve).catch(reject));
 
 const promisify = async (promise) => {
 	try {
@@ -47,4 +51,5 @@ module.exports = {
 	pipe,
 	pipeAsync,
 	then,
+	futurePromise,
 };

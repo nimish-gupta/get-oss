@@ -33,7 +33,31 @@ const fixtures = {
 	noEmailUser: {
 		data: { name, login: username },
 	},
-	commits: {},
+	ownedRepos: {
+		data: [
+			{
+				name: repo,
+			},
+		],
+	},
+	commits: {
+		data: [
+			{
+				commit: {
+					author: { name, email },
+				},
+			},
+		],
+	},
+	emptyEvents: {
+		data: [
+			{
+				payload: {
+					commits: [],
+				},
+			},
+		],
+	},
 };
 
 module.exports = fixtures;

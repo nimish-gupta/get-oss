@@ -43,12 +43,10 @@ const checkValidEmailFromCommit = (name) => (commit) =>
 
 const getUserInfo = async (username) => {
 	const { data: user } = await octokit.users.getByUsername({ username });
-	console.log(user);
 	if (user.email !== null && user.email !== undefined) {
 		return user;
 	}
 
-	console.log('sing');
 	const {
 		data: events,
 	} = await octokit.activity.listEventsForAuthenticatedUser({

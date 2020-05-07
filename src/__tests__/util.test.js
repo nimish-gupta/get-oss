@@ -36,7 +36,7 @@ test.beforeEach((t) => {
 	t.context.stream = stream;
 });
 
-test.skip('spinnerPromise resolves', async (t) => {
+test('spinnerPromise resolves', async (t) => {
 	const msg = 'test promise spinner';
 
 	const promise = await Util.spinnerPromise(successPromise(), msg, {

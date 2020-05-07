@@ -8,6 +8,7 @@ const setAuth = (token) => {
 		userAgent: 'get-oss v1.2.3',
 		...(token ? { auth: token } : {}),
 	});
+	return octokit;
 };
 
 const search = async ({ query: q, page = 1 }) => {
@@ -42,10 +43,12 @@ const checkValidEmailFromCommit = (name) => (commit) =>
 
 const getUserInfo = async (username) => {
 	const { data: user } = await octokit.users.getByUsername({ username });
-	if (user.email !== null) {
+	console.log(user);
+	if (user.email !== null && user.email !== undefined) {
 		return user;
 	}
 
+	console.log('sing');
 	const {
 		data: events,
 	} = await octokit.activity.listEventsForAuthenticatedUser({

@@ -8,12 +8,13 @@ const parseArgs = (args) =>
 		string: ['secret'],
 	});
 
-const help = () =>
-	console.log(Log.text`
+const help = () => {
+	const message = `
 A simple cli tool for getting the email address of the top 10 contributors in the repo.
 Usage
 	--secret, -s : Pass github authentication token to increase the github api call limit. For more info check https://developer.github.com/v3/rate_limit/
-	--help, -h : For info
-		`);
-
+	--help, -h : For info`;
+	console.log(Log.text(message));
+	return message;
+};
 module.exports = { help, parseArgs };

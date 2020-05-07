@@ -4,35 +4,34 @@ const username = 'nimish-gupta',
 	name = 'Nimish Gupta';
 
 const fixtures = {
-	repos: {
+	repos: (empty = false) => ({
 		data: {
-			items: [
-				{
-					full_name: `${username}/${repo}`,
-					name: repo,
-					owner: { login: username },
-				},
-			],
+			items: empty
+				? []
+				: [
+						{
+							full_name: `${username}/${repo}`,
+							name: repo,
+							owner: { login: username },
+						},
+				  ],
 		},
-	},
+	}),
 	contributors: {
 		data: [{ login: username }],
 	},
-	events: {
+	events: (empty = false) => ({
 		data: [
 			{
 				payload: {
-					commits: [{ author: { name, email } }],
+					commits: empty ? [] : [{ author: { name, email } }],
 				},
 			},
 		],
-	},
-	user: {
-		data: { email, name, login: username },
-	},
-	noEmailUser: {
-		data: { name, login: username },
-	},
+	}),
+	user: (noEmail = false) => ({
+		data: { name, login: username, ...(noEmail ? {} : { email }) },
+	}),
 	ownedRepos: {
 		data: [
 			{
@@ -40,24 +39,26 @@ const fixtures = {
 			},
 		],
 	},
-	commits: {
-		data: [
-			{
-				commit: {
-					author: { name, email },
-				},
-			},
-		],
+	commits: (empty = false) => ({
+		data: empty
+			? []
+			: [
+					{
+						commit: {
+							author: { name, email },
+						},
+					},
+			  ],
+	}),
+	searchPrompt: {
+		repoQuery: `${username}/${repo}`,
 	},
-	emptyEvents: {
-		data: [
-			{
-				payload: {
-					commits: [],
-				},
-			},
-		],
+	selectPrompt: {
+		repo: `${username}/${repo}`,
 	},
+	confirmPrompt: (ans = true) => ({
+		searchAgain: ans,
+	}),
 };
 
 module.exports = fixtures;

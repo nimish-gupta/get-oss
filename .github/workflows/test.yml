@@ -25,6 +25,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn install --frozen-lockfile
       - run: yarn test
+      - run: yarn report:coverage
       - uses: actions/checkout@v2
         if: matrix.node-version == 14 # only run coverage once
       - uses: codecov/codecov-action@v1

@@ -18,7 +18,8 @@
 	},
 	"scripts": {
 		"start:dev": "node .",
-		"test": "nyc ava"
+		"test": "nyc ava",
+		"report:coverage": "nyc report --reporter=lcov --reporter=text"
 	},
 	"dependencies": {
 		"@octokit/rest": "^17.6.0",

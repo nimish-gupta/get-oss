@@ -24,10 +24,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn install --frozen-lockfile
-      - run: yarn test
-      - run: yarn report:coverage
+      - run: yarn test:coverage
       - uses: actions/checkout@v2
         if: matrix.node-version == 14 # only run coverage once
       - uses: codecov/codecov-action@v1
         with:
-          fail_ci_if_error: true # optional (default = false)
+          fail_ci_if_error: true
+          file: ./coverage/Icov.info

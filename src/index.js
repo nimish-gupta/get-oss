@@ -39,15 +39,15 @@ const getEmailOfFirstTenCollaborators = async ({ usernames }) => {
 	return emailsWithUser;
 };
 
-const main = async (args) => {
+const main = async (args, onExit = () => process.exit(0)) => {
 	const parsedArgs = Args.parseArgs(args);
 
 	if (parsedArgs.help) {
-		Args.help();
-		process.exit(0);
+		const help = Args.help();
+		return onExit(help);
 	}
 
-	Github.setAuth(parsedArgs.token);
+	Github.setAuth(parsedArgs.secret);
 
 	const { repoQuery: query } = await Questions.getSearchPrompt();
 
@@ -62,7 +62,7 @@ const main = async (args) => {
 		if (searchAgain === true) {
 			await main(args);
 		}
-		process.exit(0);
+		return onExit(searchAgain);
 	}
 
 	const { repo } = await Questions.getSelectRepoPrompt(repos);
@@ -78,7 +78,7 @@ const main = async (args) => {
 	);
 
 	Table.formatter({ emailsWithUser });
-	return process.exit(0);
+	return onExit(emailsWithUser);
 };
 
-module.exports = { main };
+module.exports = { main, getEmailOfFirstTenCollaborators };

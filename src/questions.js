@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 
+/* istanbul ignore next */
 const getSearchPrompt = async () =>
 	inquirer.prompt([
 		{
@@ -11,6 +12,7 @@ const getSearchPrompt = async () =>
 		},
 	]);
 
+/* istanbul ignore next */
 const getSelectRepoPrompt = async (repos) =>
 	inquirer.prompt({
 		type: 'list',
@@ -25,6 +27,7 @@ const getSelectRepoPrompt = async (repos) =>
 		pageSize: 10,
 	});
 
+/* istanbul ignore next */
 const repoDoesNotExistPrompt = async () =>
 	inquirer.prompt({
 		type: 'confirm',

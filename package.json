@@ -39,6 +39,7 @@
 	"devDependencies": {
 		"ava": "^3.8.1",
 		"get-stream": "^5.1.0",
-		"nyc": "^15.0.1"
+		"nyc": "^15.0.1",
+		"sinon": "^9.0.2"
 	}
 }

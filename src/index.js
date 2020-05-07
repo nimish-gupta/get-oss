@@ -60,7 +60,7 @@ const main = async (args, onExit = () => process.exit(0)) => {
 		const { searchAgain } = await Questions.repoDoesNotExistPrompt();
 
 		if (searchAgain === true) {
-			// await main(args);
+			await main(args);
 		}
 		return onExit(searchAgain);
 	}

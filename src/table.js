@@ -3,6 +3,14 @@ const Table = require('cli-table');
 const Log = require('./log');
 
 const formatter = ({ emailsWithUser }) => {
+	if (emailsWithUser.length === 0) {
+		console.log(
+			Log.text(
+				`Sorry no emails under the current repo, please try another repo :)`
+			)
+		);
+		return '';
+	}
 	const table = new Table({
 		head: [
 			Log.text('User Name'),

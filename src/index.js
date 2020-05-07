@@ -1,5 +1,6 @@
 const ora = require('ora');
 const R = require('ramda');
+const F = require('ramda-fantasy');
 
 const Questions = require('./questions');
 const Github = require('./github');
@@ -52,51 +53,49 @@ const parseArgs = (args) => {
 	Github.setAuth(parsedArgs.secret);
 };
 
-const repoQuery = R.pipe(
-	Questions.getSearchPrompt,
-	Util.then(
-		R.pipe(
-			R.prop('repoQuery'),
-			Github.search,
-			Util.exitPromise('repositories'),
-			Util.spinnerPromise('Searching the repos...')
-		)
-	)
+// R.chain(Util.futurePromise),
+// R.map(Util.spinnerPromise('Getting the list of contributors...')),
+// R.map(Util.exitPromise('contributors')),
+// R.map(Github.getContributorUserNames),
+// R.chain(Util.futurePromise),
+// R.map(Util.spinnerPromise('Getting the list of users email addresses...')),
+// R.map(getEmailOfFirstTenCollaborators),
+
+const isRepoExists = (repos) =>
+	repos.length === 0 ? F.Either.Left('') : F.Either.Right(repos);
+
+const repoQuery = R.compose(
+	// R.map(R.prop('repo')),
+	R.chain(Util.futurePromise),
+	R.map(Util.spinnerPromise('Searching the repos...')),
+	R.map(Util.exitPromise('repositories')),
+	R.map(Github.search),
+	R.map(R.prop('repoQuery')),
+	Questions.getSearchPrompt
 );
 
-const getRepoName = async () => {
-	const repos = await repoQuery();
-	if (repos.length === 0) {
-		const { searchAgain } = await Questions.repoDoesNotExistPrompt();
-		if (searchAgain === true) {
-			return getRepoName();
-		}
+const getRepoName = () =>
+	repoQuery().fork(
+		(err) => console.log('err', err),
+		(data) => console.log('data', data.fork())
+	);
 
-		process.exit(0);
-	}
-	return R.pipe(
-		getEmailOfFirstTenCollaborators,
-		Util.spinnerPromise('Getting the list of users email addresses...')
-	)();
-};
+// const getEmailsWithUser = Util.pipeAsync(
+// 	R.compose(
+// 		Util.spinnerPromise('Getting the list of contributors...'),
+// 		Util.exitPromise('contributors'),
+// 		Github.getContributorUserNames
+// 	),
+// 	R.compose(
+// 		Util.spinnerPromise('Getting the list of users email addresses...'),
+// 		getEmailOfFirstTenCollaborators
+// 	)
+// );
 
-const getEmailsWithUser = Util.pipeAsync(
-	Util.pipe(
-		Github.getContributorUserNames,
-		Util.exitPromise('contributors'),
-		Util.spinnerPromise('Getting the list of contributors...')
-	),
-	Util.pipe(
-		getEmailOfFirstTenCollaborators,
-		Util.spinnerPromise('Getting the list of users email addresses...')
-	)
-);
-
-const main = R.pipe(
-	parseArgs,
+const main = R.compose(
+	// Util.then(Table.formatter),
 	getRepoName,
-	Util.then(getEmailsWithUser),
-	Util.then(Table.formatter)
+	parseArgs
 );
 
 module.exports = { main };

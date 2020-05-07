@@ -19,7 +19,7 @@
 	"scripts": {
 		"start:dev": "node .",
 		"test": "nyc ava",
-		"test:coverage": "yarn test && nyc report --reporter=lcov"
+		"test:coverage": "yarn test && nyc report --reporter=text-lcov > coverage.lcov"
 	},
 	"dependencies": {
 		"@octokit/rest": "^17.6.0",

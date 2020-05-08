@@ -36,18 +36,19 @@ const getSelectRepoPrompt = (repos) =>
 			.catch(reject)
 	);
 
-/* istanbul ignore next */
-const repoDoesNotExistPrompt = async () =>
-	inquirer.prompt({
-		type: 'confirm',
-		name: 'searchAgain',
-		message: `Repo doesn't exist. Do you want to search again?`,
-	});
-
-const getAnswer = (key) => (answer) => answer[key];
+const repoDoesNotExistPrompt = () =>
+	F.Future((reject, resolve) =>
+		inquirer
+			.prompt({
+				type: 'confirm',
+				name: 'searchAgain',
+				message: `Repo doesn't exist. Do you want to search again?`,
+			})
+			.then(resolve)
+			.catch(reject)
+	);
 
 module.exports = {
-	getAnswer,
 	getSearchPrompt,
 	getSelectRepoPrompt,
 	repoDoesNotExistPrompt,

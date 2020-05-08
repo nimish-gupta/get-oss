@@ -53,19 +53,25 @@ const parseArgs = (args) => {
 	Github.setAuth(parsedArgs.secret);
 };
 
-// R.chain(Util.futurePromise),
-// R.map(Util.spinnerPromise('Getting the list of contributors...')),
-// R.map(Util.exitPromise('contributors')),
-// R.map(Github.getContributorUserNames),
-// R.chain(Util.futurePromise),
-// R.map(Util.spinnerPromise('Getting the list of users email addresses...')),
-// R.map(getEmailOfFirstTenCollaborators),
+const whenRepoDoesNotExist = R.compose(
+	R.map(R.prop('searchAgain')),
+	Questions.repoDoesNotExistPrompt
+);
 
-const isRepoExists = (repos) =>
-	repos.length === 0 ? F.Either.Left('') : F.Either.Right(repos);
+const whenRepoExist = R.compose(
+	R.map(Table.formatter),
+	R.chain(Util.futurePromise),
+	R.map(Util.spinnerPromise('Getting the list of users email addresses...')),
+	R.map(getEmailOfFirstTenCollaborators),
+	R.chain(Util.futurePromise),
+	R.map(Util.spinnerPromise('Getting the list of contributors...')),
+	R.map(Util.exitPromise('repositories')),
+	R.map(Github.getContributorUserNames),
+	R.map(R.prop('repo')),
+	Questions.getSelectRepoPrompt
+);
 
 const repoQuery = R.compose(
-	// R.map(R.prop('repo')),
 	R.chain(Util.futurePromise),
 	R.map(Util.spinnerPromise('Searching the repos...')),
 	R.map(Util.exitPromise('repositories')),
@@ -77,25 +83,25 @@ const repoQuery = R.compose(
 const getRepoName = () =>
 	repoQuery().fork(
 		(err) => console.log('err', err),
-		(data) => console.log('data', data.fork())
+		(repos) => {
+			if (repos.length === 0) {
+				return whenRepoDoesNotExist().fork(
+					(err) => console.log('repo does not exist', err),
+					(searchAgain) => {
+						if (!searchAgain) {
+							process.exit(0);
+						}
+						return getRepoName();
+					}
+				);
+			}
+			return whenRepoExist(repos).fork(
+				(err) => console.log('repo Exist', err),
+				(data) => console.log('repo exist', data)
+			);
+		}
 	);
 
-// const getEmailsWithUser = Util.pipeAsync(
-// 	R.compose(
-// 		Util.spinnerPromise('Getting the list of contributors...'),
-// 		Util.exitPromise('contributors'),
-// 		Github.getContributorUserNames
-// 	),
-// 	R.compose(
-// 		Util.spinnerPromise('Getting the list of users email addresses...'),
-// 		getEmailOfFirstTenCollaborators
-// 	)
-// );
-
-const main = R.compose(
-	// Util.then(Table.formatter),
-	getRepoName,
-	parseArgs
-);
+const main = R.compose(getRepoName, parseArgs);
 
 module.exports = { main };

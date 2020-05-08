@@ -36,20 +36,9 @@ const spinnerPromise = (text, spinnerOptions = {}) => async (promise) => {
 	return result;
 };
 
-const pipeAsync = (...functions) => (input) =>
-	functions.reduce((chain, func) => chain.then(func), Promise.resolve(input));
-
-const pipe = (...functions) => (input) =>
-	functions.reduce((val, func) => func(val), input);
-
-const then = R.curry((f, p) => p.then(f));
-
 module.exports = {
 	promisify,
 	exitPromise,
 	spinnerPromise,
-	pipe,
-	pipeAsync,
-	then,
 	futurePromise,
 };

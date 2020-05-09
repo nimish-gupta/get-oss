@@ -16,18 +16,17 @@ const promisify = async (promise) => {
 	}
 };
 
-const exitPromise = (msg) => async (promise) => {
+const exitPromise = R.curry(async (msg, promise) => {
 	const [result, error] = await promisify(promise);
 
 	if (error !== null) {
-		const errorMessage = `Could not query repo for ${msg} due to, ${error}`;
 		console.log('\n');
-		console.log(Log.error(errorMessage));
-		return onError(errorMessage);
+		console.log(Log.error(`Could not query repo for ${msg} due to, ${error}`));
+		return process.exit(0);
 	}
 
 	return result;
-};
+});
 
 const spinnerPromise = (text, spinnerOptions = {}) => async (promise) => {
 	const spinner = ora({ text, ...spinnerOptions }).start();

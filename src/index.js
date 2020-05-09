@@ -48,7 +48,7 @@ const showHelp = () => {
 };
 
 const getMayBeToken = (args) =>
-	args.help ? F.Either.Left() : F.Either.Right(args.token);
+	args.help ? F.Either.Left() : F.Either.Right(args.secret);
 
 const parseArgs = R.compose(
 	F.Either.either(showHelp, Github.setAuth),

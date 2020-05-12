@@ -57,6 +57,7 @@ const parseArgs = R.compose(
 );
 
 const whenRepoDoesNotExist = R.compose(
+	R.map(F.Either.Left),
 	R.map(R.prop('searchAgain')),
 	Questions.repoDoesNotExistPrompt
 );
@@ -68,6 +69,7 @@ const getContributorsName = R.compose(
 );
 
 const whenRepoExist = R.compose(
+	R.map(F.Either.Right),
 	R.map(Table.formatter),
 	R.chain(Util.futurePromise),
 	R.map(Util.spinnerPromise('Getting the list of users email addresses...')),
@@ -84,28 +86,23 @@ const getSearchResults = R.compose(
 	R.map(Github.search)
 );
 
+const isRepoExist = (repos) =>
+	repos.length === 0 ? F.Either.Left('') : F.Either.Right(repos);
+
+const doAgainSearchRepo = (ans) =>
+	ans ? F.Future.of(getRepoName()) : F.Future.of(R.identity);
+
 const repoQuery = R.compose(
+	R.chain(F.Either.either(doAgainSearchRepo, () => F.Future.of(R.identity))),
+	R.chain(F.Either.either(whenRepoDoesNotExist, whenRepoExist)),
+	R.map(isRepoExist),
 	R.chain(Util.futurePromise),
 	getSearchResults,
 	R.map(R.prop('repoQuery')),
 	Questions.getSearchPrompt
 );
 
-const getRepoName = () =>
-	repoQuery().fork(console.error, (repos) => {
-		if (repos.length === 0) {
-			return whenRepoDoesNotExist().fork(
-				(err) => console.log('repo does not exist', err),
-				(searchAgain) => {
-					if (!searchAgain) {
-						process.exit(0);
-					}
-					return getRepoName();
-				}
-			);
-		}
-		return whenRepoExist(repos).fork(console.error, R.identity);
-	});
+const getRepoName = () => repoQuery().fork(console.error, R.identity);
 
 const main = R.compose(getRepoName, parseArgs);
 

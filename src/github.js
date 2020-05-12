@@ -4,10 +4,13 @@ const validator = require('validator');
 let octokit = null;
 
 const setAuth = (token) => {
-	octokit = new Octokit({
-		userAgent: 'get-oss v1.2.3',
-		...(token ? { auth: token } : {}),
-	});
+	if (octokit === null) {
+		octokit = new Octokit({
+			userAgent: 'get-oss v1.2.3',
+			...(token ? { auth: token } : {}),
+		});
+	}
+
 	return octokit;
 };
 

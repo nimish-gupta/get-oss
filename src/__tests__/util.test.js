@@ -1,11 +1,19 @@
 const test = require('ava');
 const PassThroughStream = require('stream').PassThrough;
 const getStream = require('get-stream');
+const sinon = require('sinon');
 
 const Util = require('../utils');
 
 const successPromise = () => Promise.resolve('success');
 const errorPromise = () => Promise.reject(new Error('fail'));
+
+const processStub = sinon.stub();
+
+test.before(() => {
+	sinon.replace(process, 'exit', processStub);
+	processStub.returnsArg(0);
+});
 
 test('promisify resolves', async (t) => {
 	const promise = await Util.promisify(successPromise());
@@ -18,13 +26,18 @@ test('promisify rejects', async (t) => {
 });
 
 test('exitPromise resolves', async (t) => {
-	const promise = await Util.exitPromise(successPromise(), '');
+	const promise = await Util.exitPromise('', successPromise());
 	t.is(promise, 'success');
 });
 
 test('exitPromise rejects', async (t) => {
-	const promise = await Util.exitPromise(errorPromise(), 'test', (x) => x);
-	t.is(promise, 'Could not query repo for test due to, fail');
+	try {
+		const promise = await Util.exitPromise('test', errorPromise());
+		t.is(promise, 0);
+		t.is(processStub.calledOnce, true);
+	} catch (error) {
+		console.log(error);
+	}
 });
 
 test.beforeEach((t) => {
@@ -39,9 +52,9 @@ test.beforeEach((t) => {
 test('spinnerPromise resolves', async (t) => {
 	const msg = 'test promise spinner';
 
-	const promise = await Util.spinnerPromise(successPromise(), msg, {
+	const promise = await Util.spinnerPromise(msg, {
 		stream: t.context.stream,
-	});
+	})(successPromise());
 	t.context.stream.end();
 	const output = await getStream(t.context.stream);
 
@@ -51,6 +64,10 @@ test('spinnerPromise resolves', async (t) => {
 
 test('spinnerPromise reject', async (t) =>
 	await t.throwsAsync(
-		async () => Util.spinnerPromise(Promise.reject(new Error('fail')), ''),
+		async () => Util.spinnerPromise('')(Promise.reject(new Error('fail'))),
 		{ instanceOf: Error, message: 'fail' }
 	));
+
+test.after(() => {
+	sinon.restore();
+});

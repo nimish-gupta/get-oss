@@ -2,7 +2,7 @@ const Table = require('cli-table');
 
 const Log = require('./log');
 
-const formatter = ({ emailsWithUser }) => {
+const formatter = (emailsWithUser) => {
 	if (emailsWithUser.length === 0) {
 		console.log(
 			Log.text(

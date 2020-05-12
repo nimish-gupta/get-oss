@@ -1,6 +1,11 @@
+const R = require('ramda');
 const ora = require('ora');
+const F = require('ramda-fantasy');
 
 const Log = require('./log');
+
+const futurePromise = (promise) =>
+	F.Future((reject, resolve) => promise.then(resolve).catch(reject));
 
 const promisify = async (promise) => {
 	try {
@@ -11,24 +16,28 @@ const promisify = async (promise) => {
 	}
 };
 
-const exitPromise = async (promise, msg, onError = () => process.exit(1)) => {
+const exitPromise = R.curry(async (msg, promise) => {
 	const [result, error] = await promisify(promise);
 
 	if (error !== null) {
-		const errorMessage = `Could not query repo for ${msg} due to, ${error}`;
 		console.log('\n');
-		console.log(Log.error(errorMessage));
-		return onError(errorMessage);
+		console.log(Log.error(`Could not query repo for ${msg} due to, ${error}`));
+		return process.exit(0);
 	}
 
 	return result;
-};
+});
 
-const spinnerPromise = async (promise, text, spinnerOptions = {}) => {
+const spinnerPromise = (text, spinnerOptions = {}) => async (promise) => {
 	const spinner = ora({ text, ...spinnerOptions }).start();
 	const result = await promise;
 	spinner.stop();
 	return result;
 };
 
-module.exports = { promisify, exitPromise, spinnerPromise };
+module.exports = {
+	promisify,
+	exitPromise,
+	spinnerPromise,
+	futurePromise,
+};

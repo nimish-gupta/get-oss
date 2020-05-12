@@ -5,4 +5,9 @@ const success = chalk.italic.green;
 const text = chalk.cyan;
 const url = chalk.underline.blue;
 
-module.exports = { error, success, text, url };
+const log = (value) => {
+	console.log(value);
+	return value;
+};
+
+module.exports = { error, success, text, url, log };
